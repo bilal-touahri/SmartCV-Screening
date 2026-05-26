@@ -54,26 +54,11 @@ CREATE TABLE offres (
         ON DELETE CASCADE
 );
 
--- Table 5: cv
-CREATE TABLE cv (
-    id SERIAL PRIMARY KEY,
-    user_id INT NOT NULL,
-    chemin_fichier VARCHAR(255) NOT NULL,
-    texte_extrait TEXT,
-    date_upload TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    valide BOOLEAN DEFAULT TRUE,
-
-    FOREIGN KEY (user_id)
-        REFERENCES users(id)
-        ON DELETE CASCADE
-);
-
--- Table 6: candidatures
+-- Table 5: candidatures
 CREATE TABLE candidatures (
     id SERIAL PRIMARY KEY,
     user_id INT NOT NULL,
     offre_id INT NOT NULL,
-    cv_id INT NOT NULL,
     date_depot TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     statut VARCHAR(30) DEFAULT 'en_attente'
         CHECK (statut IN ('en_attente', 'acceptee', 'rejetee', 'analysee')),
@@ -86,11 +71,21 @@ CREATE TABLE candidatures (
         REFERENCES offres(id)
         ON DELETE CASCADE,
 
-    FOREIGN KEY (cv_id)
-        REFERENCES cv(id)
-        ON DELETE CASCADE,
-
     UNIQUE (user_id, offre_id)
+);
+
+-- Table 6: cv
+CREATE TABLE cv (
+    id SERIAL PRIMARY KEY,
+    candidature_id INT NOT NULL UNIQUE,
+    chemin_fichier VARCHAR(255) NOT NULL,
+    texte_extrait TEXT,
+    date_upload TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    valide BOOLEAN DEFAULT TRUE,
+
+    FOREIGN KEY (candidature_id)
+        REFERENCES candidatures(id)
+        ON DELETE CASCADE
 );
 
 -- Table 7: analyse_cv
@@ -170,18 +165,16 @@ CREATE INDEX idx_verification_tokens_code ON verification_tokens(code);
 CREATE INDEX idx_offres_recruteur_id ON offres(recruteur_id);
 CREATE INDEX idx_offres_statut ON offres(statut);
 
-CREATE INDEX idx_cv_user_id ON cv(user_id);
-
 CREATE INDEX idx_candidatures_user_id ON candidatures(user_id);
 CREATE INDEX idx_candidatures_offre_id ON candidatures(offre_id);
-CREATE INDEX idx_candidatures_cv_id ON candidatures(cv_id);
+
+CREATE INDEX idx_cv_candidature_id ON cv(candidature_id);
 
 CREATE INDEX idx_score_matching_candidature_id ON score_matching(candidature_id);
 CREATE INDEX idx_score_matching_score_globale ON score_matching(score_globale);
 
 CREATE INDEX idx_bias_analyse_score_id ON bias_analyse(score_id);
 CREATE INDEX idx_test_contrefactual_bias_id ON test_contrefactual(bias_id);
-
 
 
 -- Données initiales des rôles
