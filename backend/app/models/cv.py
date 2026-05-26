@@ -5,12 +5,17 @@ from sqlalchemy.orm import relationship
 
 from app.core.database import Base
 
-
 class CV(Base):
     __tablename__ = "cv"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+
+    candidature_id = Column(
+        Integer,
+        ForeignKey("candidatures.id", ondelete="CASCADE"),
+        unique=True,
+        nullable=False
+    )
 
     chemin_fichier = Column(String(255), nullable=False)
     texte_extrait = Column(Text)
@@ -18,6 +23,5 @@ class CV(Base):
     date_upload = Column(DateTime, default=datetime.utcnow)
     valide = Column(Boolean, default=True)
 
-    user = relationship("User")
-    candidature = relationship("Candidature", back_populates="cv", uselist=False)
+    candidature = relationship("Candidature", back_populates="cv")
     analyse = relationship("AnalyseCV", back_populates="cv", uselist=False)
