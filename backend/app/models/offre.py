@@ -23,5 +23,10 @@ class Offre(Base):
 
     recruteur_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
 
-    recruteur = relationship("User")
-    candidatures = relationship("Candidature", back_populates="offre", cascade="all, delete")
+    recruteur = relationship("User", back_populates="offres")
+    
+    candidatures = relationship(
+    "Candidature",
+    back_populates="offre",
+    cascade="all, delete-orphan"
+    )

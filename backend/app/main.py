@@ -7,6 +7,14 @@ from app.core.database import Base, engine
 from app.models.role import Role
 from app.models.user import User
 from app.models.verification_token import VerificationToken
+from app.models.offre import Offre
+from app.models.cv import CV
+from app.models.candidature import Candidature
+from app.models.analyse_cv import AnalyseCV
+from app.models.score_matching import ScoreMatching
+from app.models.bias_analyse import BiasAnalyse
+from app.models.test_contrefactual import TestContrefactual
+from app.models.analyse_cv import AnalyseCV
 
 # Create tables
 Base.metadata.create_all(bind=engine)
@@ -16,8 +24,10 @@ app = FastAPI(
     version="1.0.0"
 )
 
+
 @app.get("/")
 def root():
     return {"message": "API prête"}
+
 
 app.include_router(api_router)
