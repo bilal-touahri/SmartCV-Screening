@@ -24,3 +24,15 @@ class User(Base):
         back_populates="user",
         cascade="all, delete-orphan"
     )
+
+    offres = relationship(
+    "Offre",
+    back_populates="recruteur",
+    cascade="all, delete-orphan"
+    )
+
+    candidatures = relationship(
+    "Candidature",
+    back_populates="candidat",
+    cascade="all, delete-orphan"
+    )
