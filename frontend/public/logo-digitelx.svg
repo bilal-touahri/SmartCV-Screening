@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <!-- Hexagone rempli -->
+  <polygon points="50,4 89,26 89,74 50,96 11,74 11,26" fill="#0D3349"/>
+  <!-- Contour hexagone en corail -->
+  <polygon points="50,4 89,26 89,74 50,96 11,74 11,26"
+           fill="none" stroke="#FF6B6B" stroke-width="3.5" stroke-linejoin="round"/>
+
+  <!-- Lettre D -->
+  <!-- Barre verticale gauche -->
+  <rect x="19" y="29" width="9" height="42" rx="3" fill="white"/>
+  <!-- Barre haute -->
+  <rect x="19" y="29" width="19" height="9" rx="3" fill="white"/>
+  <!-- Barre basse -->
+  <rect x="19" y="62" width="19" height="9" rx="3" fill="white"/>
+  <!-- Courbe droite du D -->
+  <path d="M38 29 Q58 29 58 50 Q58 71 38 71 L38 62 Q50 62 50 50 Q50 38 38 38 Z" fill="white"/>
+
+  <!-- Lettre X -->
+  <line x1="64" y1="29" x2="84" y2="71" stroke="white" stroke-width="7" stroke-linecap="round"/>
+  <line x1="84" y1="29" x2="64" y2="71" stroke="white" stroke-width="7" stroke-linecap="round"/>
+</svg>
