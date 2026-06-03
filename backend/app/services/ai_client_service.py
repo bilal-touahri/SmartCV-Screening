@@ -28,3 +28,41 @@ def analyse_cv_with_ai(texte_extrait: str) -> dict:
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Erreur du service IA: {e.response.text}"
         )
+    
+
+def calculate_matching_score_with_ai(
+    competences: str,
+    competences_offre: str,
+    job_role: str,
+    experience: int,
+    education: str,
+    langues: str
+) -> dict:
+    try:
+        response = httpx.post(
+            f"{AI_SERVICE_URL}/matching/score",
+            json={
+                "competences": competences,
+                "competences_offre": competences_offre,
+                "job_role": job_role,
+                "experience": experience,
+                "education": education,
+                "langues": langues
+            },
+            timeout=60
+        )
+
+        response.raise_for_status()
+        return response.json()
+
+    except httpx.RequestError:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Service IA indisponible"
+        )
+
+    except httpx.HTTPStatusError as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Erreur du service IA Matching: {e.response.text}"
+        )

@@ -57,9 +57,9 @@ def clean_cv_text(text: str) -> str:
     return " ".join(text.split())
 
 
-def create_cv(db: Session, user_id: int, file_path: str, texte_extrait: str):
+def create_cv(db: Session, candidature_id: int, file_path: str, texte_extrait: str):
     cv = CV(
-        user_id=user_id,
+        candidature_id=candidature_id,
         chemin_fichier=file_path,
         texte_extrait=texte_extrait,
         valide=True

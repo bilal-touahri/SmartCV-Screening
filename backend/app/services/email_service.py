@@ -24,7 +24,7 @@ async def send_verification_email(email_to: str, code: str):
     <body>
         <h2>Bienvenue sur SmartCV Screening</h2>
         <p>Votre code de vérification est :</p>
-        <h1 style='color: #04E1F9;'>{code}</h1>
+        <h1 style='color: #000000; font-weight: bold;'>{code}</h1>
         <p>Veuillez saisir ce code pour activer votre compte.</p>
     </body>
     </html>
@@ -50,7 +50,7 @@ async def send_password_reset_email(email_to: str, code: str):
     <body>
         <h2>Réinitialisation du mot de passe</h2>
         <p>Votre code de réinitialisation est :</p>
-        <h1 style='color: #04E1F9;'>{code}</h1>
+        <h1 style='color: #000000; font-weight: bold;'>{code}</h1>
         <p>Si vous n'êtes pas à l'origine de cette demande, ignorez cet email.</p>
     </body>
     </html>

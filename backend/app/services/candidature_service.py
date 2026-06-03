@@ -1,13 +1,18 @@
 from fastapi import HTTPException, UploadFile, status
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
+from decimal import Decimal
 
 from app.models.analyse_cv import AnalyseCV
-from app.services.ai_client_service import analyse_cv_with_ai
 from app.models.candidature import Candidature
 from app.models.cv import CV
 from app.models.offre import Offre
+from app.models.score_matching import ScoreMatching
 from app.models.user import User
+from app.services.ai_client_service import (
+    analyse_cv_with_ai,
+    calculate_matching_score_with_ai
+)
 from app.services.cv_service import (
     validate_pdf,
     save_cv_file,
@@ -96,6 +101,25 @@ def postuler_a_offre(
     )
 
     db.add(analyse)
+
+    matching_result = calculate_matching_score_with_ai(
+        competences=analyse.competences_extraites or "",
+        competences_offre=offre.competences or "",
+        job_role=offre.title or "",
+        experience=analyse.annees_experience or 0,
+        education=analyse.niveau_formation or "Licence",
+        langues=analyse.langues or "Arabe"
+    )
+
+    score = ScoreMatching(
+        candidature_id=candidature.id,
+        score_globale=matching_result["score_final"],
+        score_competences=matching_result["similarite"],
+        score_experiences=analyse.annees_experience or 0,
+        score_formation=0
+    )
+
+    db.add(score)
 
     try:
         db.commit()
@@ -220,7 +244,7 @@ def update_candidature_status(
             detail="Offre introuvable."
         )
 
-    if offre.user_id != current_user.id and current_user.role_id != 1:
+    if current_user.role_id != 1 and offre.recruteur_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Accès interdit."
@@ -232,3 +256,55 @@ def update_candidature_status(
     db.refresh(candidature)
 
     return candidature
+
+def get_classement_by_offre(
+    db: Session,
+    offre_id: int,
+    current_user: User
+):
+    offre = db.query(Offre).filter(Offre.id == offre_id).first()
+
+    if not offre:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Offre introuvable"
+        )
+
+    if current_user.role_id != 1 and offre.recruteur_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Vous n'avez pas le droit de consulter ce classement"
+        )
+
+    rows = (
+        db.query(Candidature, ScoreMatching)
+        .join(ScoreMatching, ScoreMatching.candidature_id == Candidature.id)
+        .filter(Candidature.offre_id == offre_id)
+        .order_by(ScoreMatching.score_globale.desc())
+        .all()
+    )
+
+    result = []
+
+    for index, (candidature, score) in enumerate(rows, start=1):
+        score.rang = index
+
+        result.append({
+            "rang": index,
+            "candidature_id": candidature.id,
+            "user_id": candidature.user_id,
+            "offre_id": candidature.offre_id,
+            "statut": candidature.statut,
+            "date_depot": candidature.date_depot,
+            "score": {
+                "score_globale": float(score.score_globale or 0),
+                "score_competences": float(score.score_competences or 0),
+                "score_experiences": float(score.score_experiences or 0),
+                "score_formation": float(score.score_formation or 0),
+                "rang": index
+            }
+        })
+
+    db.commit()
+
+    return result
