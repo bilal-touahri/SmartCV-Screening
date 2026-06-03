@@ -1,6 +1,6 @@
 from typing import List
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -15,6 +15,7 @@ from app.services.offre_service import (
 
 from app.core.security import get_current_user
 from app.models.user import User
+from app.models.offre import Offre
 
 router = APIRouter(
     prefix="/offres",
@@ -36,6 +37,24 @@ def lister_offres(
     db: Session = Depends(get_db)
 ):
     return get_all_offres(db)
+
+
+@router.get("/mes-offres", response_model=List[OffreResponse])
+def mes_offres(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    if current_user.role_id not in [1, 2]:
+        raise HTTPException(
+            status_code=403,
+            detail="Accès réservé aux recruteurs et administrateurs"
+        )
+
+    return (
+        db.query(Offre)
+        .filter(Offre.recruteur_id == current_user.id)
+        .all()
+    )
 
 
 @router.get("/{offre_id}", response_model=OffreResponse)

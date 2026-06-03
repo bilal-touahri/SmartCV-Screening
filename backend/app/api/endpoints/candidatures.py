@@ -9,6 +9,7 @@ from app.models.user import User
 from app.schemas.candidature import (
     CandidatureResponse,
     CandidatureStatusUpdate,
+    ClassementCandidatResponse,
 )
 from app.services.candidature_service import (
     postuler_a_offre,
@@ -17,6 +18,7 @@ from app.services.candidature_service import (
     get_candidature_by_id,
     delete_candidature,
     update_candidature_status,
+    get_classement_by_offre,
 )
 
 
@@ -56,6 +58,17 @@ def candidatures_offre(
 ):
     return get_candidatures_by_offre(db, offre_id, current_user)
 
+
+@router.get(
+    "/offre/{offre_id}/classement",
+    response_model=List[ClassementCandidatResponse]
+)
+def classement_offre(
+    offre_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    return get_classement_by_offre(db, offre_id, current_user)
 
 @router.get("/{candidature_id}", response_model=CandidatureResponse)
 def detail_candidature(

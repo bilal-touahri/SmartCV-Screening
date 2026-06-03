@@ -27,6 +27,18 @@ from app.services.email_service import (
     send_password_reset_email
 )
 
+from app.core.security import (
+    get_current_user,
+    verify_password
+)
+
+from app.models.user import User
+
+from app.schemas.auth import (
+    UserUpdate,
+    ChangePasswordRequest
+)
+
 router = APIRouter(
     prefix="/auth",
     tags=["Authentication"]
@@ -109,6 +121,52 @@ async def login(
         )
 
     return generate_login_response(user)
+
+
+@router.get("/me", response_model=UserOut)
+async def get_me(
+    current_user: User = Depends(get_current_user)
+):
+    return current_user
+
+@router.put("/me", response_model=UserOut)
+async def update_me(
+    data: UserUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    current_user.full_name = data.full_name
+
+    db.commit()
+    db.refresh(current_user)
+
+    return current_user
+
+
+@router.put("/me/password")
+async def update_my_password(
+    data: ChangePasswordRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    if not verify_password(
+        data.current_password,
+        current_user.hashed_password
+    ):
+        raise HTTPException(
+            status_code=400,
+            detail="Mot de passe actuel incorrect"
+        )
+
+    update_user_password(
+        db,
+        current_user,
+        data.new_password
+    )
+
+    return {
+        "message": "Mot de passe modifié avec succès"
+    }
 
 
 # FORGOT PASSWORD
