@@ -29,3 +29,26 @@ class CandidatureResponse(BaseModel):
 
 class CandidatureStatusUpdate(BaseModel):
     statut: Literal["en_attente", "acceptee", "refusee"]
+
+class ScoreResponse(BaseModel):
+    score_globale: float
+    score_competences: float
+    score_experiences: float
+    score_formation: float
+    rang: Optional[int] = None
+
+    class Config:
+        from_attributes = True
+
+
+class ClassementCandidatResponse(BaseModel):
+    rang: int
+    candidature_id: int
+    user_id: int
+    offre_id: int
+    statut: str
+    date_depot: datetime
+    score: ScoreResponse
+
+    class Config:
+        from_attributes = True

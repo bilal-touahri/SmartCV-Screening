@@ -4,7 +4,7 @@ from pydantic import BaseModel
 
 class CVOut(BaseModel):
     id: int
-    user_id: int
+    candidature_id: int
     chemin_fichier: str
     texte_extrait: str | None = None
     date_upload: datetime
